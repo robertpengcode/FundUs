@@ -6,8 +6,9 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 contract FundUs {
 
     struct Charity {
-        string charityName;
+        string charityURI;
         address charityAddr;
+        uint256 minFundUSD;
         uint256 charityBalance;
         address[] donors;
         mapping(address => uint256) donations;
@@ -20,9 +21,9 @@ contract FundUs {
     uint256[] charityIds;
 
     AggregatorV3Interface internal priceFeed;
-    uint256 minFund;
+    uint256 minFundETH;
 
-    event ListCharity(address indexed listedBy, uint256 indexed charityId, string charityName, address indexed charityAddr, uint256 timeStamp);
+    event ListCharity(address indexed listedBy, uint256 indexed charityId, string charityURI, address indexed charityAddr, uint256 minFundUSD, uint256 timeStamp);
     event Donate(address indexed donor, uint256 value, uint256 indexed charityId, address indexed charityAddr, uint256 timeStamp);
     event Withdraw(uint256 indexed charityId, address indexed charityAddr, uint256 value, uint256 timeStamp);
 
@@ -53,20 +54,21 @@ contract FundUs {
         );
     }
 
-    function listCharity(string calldata charityName, address charityAddr) external onlyOwner{
+    function listCharity(string calldata charityURI, address charityAddr, uint256 minFundUSD) external onlyOwner{
         uint256 charityId = lastCharityId;
         charityIds.push(charityId);
-        charities[charityId].charityName = charityName;
+        charities[charityId].charityURI = charityURI;
         charities[charityId].charityAddr = charityAddr;
+        charities[charityId].minFundUSD = minFundUSD;
         lastCharityId++;
-        emit ListCharity(msg.sender, charityId, charityName, charityAddr, block.timestamp);
+        emit ListCharity(msg.sender, charityId, charityURI, charityAddr, minFundUSD, block.timestamp);
     }
 
     function donate(uint256 charityId) external payable{
         if (charities[charityId].charityAddr == address(0)) {
             revert FundUs_CharityNotExist();
         }
-        if (msg.value < minFund) {
+        if (msg.value < minFundETH) {
             revert FundUs_NotSufficient();
         }
         if (charities[charityId].donations[msg.sender] == 0) {
@@ -102,10 +104,15 @@ contract FundUs {
         return price;
     }
 
-    function getCharityInfo(uint256 charityId) external view returns(string memory, address, uint256, address[] memory) {
+    function getOwner() external view returns(address) {
+        return owner;
+    }
+
+    function getCharityInfo(uint256 charityId) external view returns(string memory, address, uint256, uint256, address[] memory) {
         return(
-            charities[charityId].charityName,
+            charities[charityId].charityURI,
             charities[charityId].charityAddr,
+            charities[charityId].minFundUSD,
             charities[charityId].charityBalance,
             charities[charityId].donors
         );
@@ -113,6 +120,10 @@ contract FundUs {
 
     function getCharityIds() external view returns(uint256[] memory) {
         return charityIds;
+    }
+
+    function getMinFundUSD(uint256 charityId) external view returns(uint256) {
+        return charities[charityId].minFundUSD;
     }
 
     function getDonationAmount(uint256 charityId) external view returns(uint256) {
