@@ -21,7 +21,7 @@ contract FundUs {
     uint256[] charityIds;
 
     AggregatorV3Interface internal priceFeed;
-    uint256 minFundETH;
+    uint256 public check;
 
     event ListCharity(address indexed listedBy, uint256 indexed charityId, string charityURI, address indexed charityAddr, uint256 minFundUSD, uint256 timeStamp);
     event Donate(address indexed donor, uint256 value, uint256 indexed charityId, address indexed charityAddr, uint256 timeStamp);
@@ -31,14 +31,21 @@ contract FundUs {
     error FundUs_NotSufficient();
     error FundUs_NoBalance();
     error FundUs_SentFailed();
+    error FundUs_NotValidId();
+    error FundUs_NotOwner();
+    error FundUs_NotCharity();
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "not owner");
+        if (msg.sender != owner) {
+            revert FundUs_NotOwner();
+        }
         _;
     }
 
     modifier onlyCharity(uint256 charityId) {
-        require(msg.sender == charities[charityId].charityAddr, "not charity");
+        if (msg.sender != charities[charityId].charityAddr) {
+            revert FundUs_NotCharity();
+        }
         _;
     }
 
@@ -64,11 +71,17 @@ contract FundUs {
         emit ListCharity(msg.sender, charityId, charityURI, charityAddr, minFundUSD, block.timestamp);
     }
 
+    function convertToUSD(uint256 valueWei) internal returns(uint256) {
+        uint256 price = uint256(getLatestPrice());
+        check = (valueWei * price) / 10**26;
+        return check;
+    }
+
     function donate(uint256 charityId) external payable{
         if (charities[charityId].charityAddr == address(0)) {
             revert FundUs_CharityNotExist();
         }
-        if (msg.value < minFundETH) {
+        if (convertToUSD(msg.value) < charities[charityId].minFundUSD) {
             revert FundUs_NotSufficient();
         }
         if (charities[charityId].donations[msg.sender] == 0) {
@@ -91,6 +104,13 @@ contract FundUs {
            revert FundUs_SentFailed();
         }
         emit Withdraw(charityId, msg.sender, amount, block.timestamp);
+    }
+
+    function deleteCharity(uint256 charityId) external onlyOwner {
+        if(charityId >= lastCharityId) {
+            revert FundUs_NotValidId();
+        }
+        delete charities[charityId];
     }
 
     function getLatestPrice() public view returns (int) {

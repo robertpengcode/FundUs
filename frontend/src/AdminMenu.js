@@ -25,13 +25,13 @@ const AdminMenu = ({ contract }) => {
     setMinFundUSD("");
   };
 
-  const deleteCharity = async () => {
+  const deleteCharity = async (charityId) => {
     if (!contract) {
       alert("Please connect to MetaMask!");
       return;
     }
     await contract
-      .deleteCharity()
+      .deleteCharity(charityId)
       .then(() => alert("delete charity success!"))
       .catch((err) => {
         alert(err.message);
@@ -108,7 +108,7 @@ const AdminMenu = ({ contract }) => {
         <Button
           variant="outline-success"
           className="mt-2"
-          onClick={deleteCharity}
+          onClick={() => deleteCharity(charityId)}
         >
           Delete Charity
         </Button>

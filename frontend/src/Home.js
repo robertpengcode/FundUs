@@ -12,6 +12,9 @@ const Home = ({ contract }) => {
   const [donors, setDonors] = useState([]);
   const [charityId, setCharityId] = useState("");
   const [charityIds, setCharityIds] = useState([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageURL, setImageURL] = useState("");
 
   const getCharityIds = async () => {
     if (!contract) {
@@ -21,7 +24,8 @@ const Home = ({ contract }) => {
     await contract
       .getCharityIds()
       .then((ids) => {
-        setCharityIds(ids);
+        const idsArr = ids.map((id) => id.toNumber());
+        setCharityIds(idsArr);
       })
       .catch((err) => {
         alert(err.message);
@@ -37,9 +41,22 @@ const Home = ({ contract }) => {
       .getCharityInfo(charityId)
       .then((info) => {
         setInfo(info);
+        getMoreInfo(info[0]);
       })
       .catch((err) => {
         alert(err.message);
+      });
+  };
+
+  const getMoreInfo = async (charityURI) => {
+    if (!charityURI) return;
+    fetch(charityURI)
+      .then((result) => result.json())
+      .then((data) => {
+        console.log("hoho", data);
+        setName(data.name);
+        setDescription(data.description);
+        setImageURL(data.imageURL);
       });
   };
 
@@ -60,68 +77,64 @@ const Home = ({ contract }) => {
       <h1 className="display-6 d-flex justify-content-center">
         Charity Information
       </h1>
-
-      <Button
-        variant="outline-success"
-        className="mt-2"
-        onClick={getCharityIds}
-      >
+      <Button variant="outline-success" onClick={getCharityIds}>
         Get Charity IDs
       </Button>
-      <Container>
-        <div className="mt-2">
-          <div>Charity IDs: {charityIds}</div>
-        </div>
-      </Container>
-
-      <Form.Group className="mb-3 mt-4">
+      <div className="mt-1">
+        <div>Charity IDs: {charityIds.join(", ")}</div>
+      </div>
+      <Form.Group className="mt-1">
         <Form.Label>Charity ID</Form.Label>
         <Form.Control
           type="number"
           placeholder="Enter Charity ID#"
           value={charityId}
-          onChange={(e) => {
-            setCharityId(e.target.value);
-          }}
+          onChange={(e) => setCharityId(e.target.value)}
           min="0"
         />
       </Form.Group>
-
       <Button
         variant="outline-success"
         className="mt-2"
-        onClick={getCharityInfo}
+        onClick={() => getCharityInfo(charityId)}
       >
         Get Info
       </Button>
 
-      <Container>
-        <div className="mt-4">
-          <div>Charity Address: {charityAddr}</div>
+      <div className="mt-1">
+        <div>Charity Name: {name}</div>
+      </div>
+      <div className="mt-1">
+        <div>Charity Address: {charityAddr}</div>
+      </div>
+      <div className="mt-1">
+        <div>Charity URI: {charityURI} </div>
+      </div>
+      <div className="mt-1">
+        {imageURL ? <img src={imageURL} width={200}></img> : null}
+      </div>
+      <div className="mt-1">
+        <div>Description: {description}</div>
+      </div>
+      <div className="mt-1">
+        <div>Min Fund in USD: {minFundUSD}</div>
+      </div>
+      <div className="mt-1">
+        <div>
+          Donors({donors.length}){": "}
+          {donors.length === 0
+            ? null
+            : donors.map((donor) => `${convertAddress(donor)}, `)}
         </div>
-        <div className="mt-2">
-          <div>Charity URI: {charityURI} </div>
+      </div>
+      <div className="mt-1">
+        <div>
+          Balance (Ether):{" "}
+          {charityBalance === 0
+            ? null
+            : ethers.utils.formatEther(charityBalance)}
         </div>
-        <div className="mt-2">
-          <div>Min Fund in USD: {minFundUSD}</div>
-        </div>
-        <div className="mt-2">
-          <div>
-            Donors({donors.length}){": "}
-            {donors.length === 0
-              ? null
-              : donors.map((donor) => `${convertAddress(donor)}, `)}
-          </div>
-        </div>
-        <div className="mt-2">
-          <div>
-            Balance (Ether):{" "}
-            {charityBalance === 0
-              ? null
-              : ethers.utils.formatEther(charityBalance)}
-          </div>
-        </div>
-      </Container>
+      </div>
     </Container>
   );
 };

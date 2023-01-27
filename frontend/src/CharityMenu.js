@@ -37,7 +37,11 @@ const CharityMenu = ({ contract }) => {
           />
         </Form.Group>
 
-        <Button variant="outline-success" className="mt-2" onClick={withdraw}>
+        <Button
+          variant="outline-success"
+          className="mt-2"
+          onClick={() => withdraw(charityId)}
+        >
           Charity Withdraw
         </Button>
       </Form>

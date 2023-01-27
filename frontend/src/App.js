@@ -14,7 +14,7 @@ function App() {
   const [signerAddr, setSignerAddr] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCharity, setIsCharity] = useState(false);
-  //console.log("cc", isCharity);
+  const [latestPrice, setLatestPrice] = useState("");
 
   useEffect(() => {
     window.ethereum.request({ method: "eth_accounts" }).then((accounts) => {
@@ -24,7 +24,8 @@ function App() {
           setContract(contract);
           if (contract) {
             checkAdmin(contract, signer);
-            checkCharity(contract);
+            checkCharity(contract, signer);
+            checkETHprice(contract);
           }
         });
       } else {
@@ -47,7 +48,8 @@ function App() {
     });
   };
 
-  const checkCharity = (contract) => {
+  const checkCharity = async (contract, signer) => {
+    let signerAddr = await signer.getAddress();
     contract.getCharityIds().then((idsArr) => {
       if (idsArr.length === 0) return;
       idsArr.forEach((id) => {
@@ -57,9 +59,18 @@ function App() {
             return charityInfo[1] === signerAddr;
           })
           .then((result) => {
-            setIsCharity(result);
+            if (result === true) {
+              setIsCharity(result);
+              return;
+            }
           });
       });
+    });
+  };
+
+  const checkETHprice = (contract) => {
+    contract.getLatestPrice().then((price) => {
+      setLatestPrice(price.toNumber());
     });
   };
 
@@ -98,7 +109,12 @@ function App() {
             ) : (
               <Route path="charity" element={<></>} />
             )}
-            <Route path="donor" element={<DonorMenu contract={contract} />} />
+            <Route
+              path="donor"
+              element={
+                <DonorMenu contract={contract} latestPrice={latestPrice} />
+              }
+            />
           </Routes>
         </div>
       </Router>
