@@ -40,7 +40,7 @@ const DonorMenu = ({ contract, latestPrice }) => {
             charityId: charityId.toNumber(),
             address: charityAddr,
             min: minFundUSD.toNumber(),
-            charityBalance: charityBalance.toNumber(),
+            charityBalance: charityBalance.toString(),
             donors: donors,
           };
 

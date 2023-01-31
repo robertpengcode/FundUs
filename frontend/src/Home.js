@@ -53,7 +53,7 @@ const Home = ({ contract }) => {
     fetch(charityURI)
       .then((result) => result.json())
       .then((data) => {
-        console.log("hoho", data);
+        //console.log("hoho", data);
         setName(data.name);
         setDescription(data.description);
         setImageURL(data.imageURL);
@@ -64,7 +64,7 @@ const Home = ({ contract }) => {
     setCharityURI(info[0]);
     setCharityAddr(info[1]);
     setMinFundUSD(info[2].toNumber());
-    setCharityBalance(info[3].toNumber());
+    setCharityBalance(info[3].toString());
     setDonors(info[4]);
   };
 

@@ -5,6 +5,7 @@
 ```
 git clone https://github.com/robertpengcode/FundUs.git
 cd FundUs
+cd backend
 npm init
 ```
 
