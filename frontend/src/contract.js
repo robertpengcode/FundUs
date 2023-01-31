@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 const provider = new ethers.providers.Web3Provider(window.ethereum);
-const FundUsAddress = "0x479828A205bCB62302D849483cAbCC06492A2Ea7";
+const FundUsAddress = "0x4620783CC39A5E2eD9228597c34eEDdcA201A654";
 const FundUsAbi = [
   "constructor()",
   "error FundUs_CharityNotExist()",
