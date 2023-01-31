@@ -26,6 +26,7 @@ contract FundUs {
     event ListCharity(address indexed listedBy, uint256 indexed charityId, string charityURI, address indexed charityAddr, uint256 minFundUSD, uint256 timeStamp);
     event Donate(address indexed donor, uint256 value, uint256 indexed charityId, address indexed charityAddr, uint256 timeStamp);
     event Withdraw(uint256 indexed charityId, address indexed charityAddr, uint256 value, uint256 timeStamp);
+    event Delete(uint256 indexed charityId, address indexed charityAddr, uint256 timeStamp);
 
     error FundUs_CharityNotExist();
     error FundUs_NotSufficient();
@@ -34,6 +35,7 @@ contract FundUs {
     error FundUs_NotValidId();
     error FundUs_NotOwner();
     error FundUs_NotCharity();
+    error FundUs_HasBalance();
 
     modifier onlyOwner() {
         if (msg.sender != owner) {
@@ -110,7 +112,16 @@ contract FundUs {
         if(charityId >= lastCharityId) {
             revert FundUs_NotValidId();
         }
+        if(charities[charityId].charityBalance > 0) {
+            revert FundUs_HasBalance();
+        }
+        address charityAddr = charities[charityId].charityAddr;
         delete charities[charityId];
+        emit Delete(charityId, charityAddr, block.timestamp);
+    }
+
+    function getPriceFeed() public view returns(AggregatorV3Interface) {
+        return priceFeed;
     }
 
     function getLatestPrice() public view returns (int) {
