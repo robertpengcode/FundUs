@@ -1,6 +1,14 @@
 # Hardhat FundUs
 
-# Getting Started
+The contract owner/admin can create a donation event for a charity. Each donation has a minimum dollar amount (USD). The contract uses [Chainlink Price Feeds](https://docs.chain.link/data-feeds/price-feeds/) to calculate the minimum ETH donors have to donate.
+
+The owner/admin uses Pinata to store the charity's metadata (name, description, and image URL) on IPFS.
+
+The owner/admin can create multiple donation events.
+
+The charity can withdraw funds donated to them.
+
+## Getting Started
 
 ```
 git clone https://github.com/robertpengcode/FundUs.git
@@ -9,7 +17,7 @@ cd backend
 npm init
 ```
 
-# Usage
+## Usage
 
 Deploy:
 
@@ -23,13 +31,13 @@ npx hardhat deploy
 npx hardhat test
 ```
 
-### Test Coverage
+## Test Coverage
 
 ```
 npx hardhat coverage
 ```
 
-# Deployment to a testnet or mainnet
+## Deployment to a testnet or mainnet
 
 1. Setup environment variables
 
@@ -44,3 +52,38 @@ https://goerlifaucet.com/
 ```
 npx hardhat deploy --network goerli
 ```
+
+## Tooling used
+
+Backend:
+
+- Hardhat
+- JavaScript/ NodeJs
+- Metamask Browser Wallet
+- Ethereum Goerli Testnet
+- Chainlink Price Feeds
+- IPFS - PINATA
+
+React Frontend:
+
+- React-Bootstrap
+- Ethers
+- React Hooks
+
+## React Frontend
+
+Admin's menu:
+
+![App](img/reactAdmin.png)
+
+Donor's menu:
+
+![App](img/reactDonor.png)
+
+Home (Info):
+
+![App](img/reactHome.png)
+
+Charity's menu:
+
+![App](img/reactCharity.png)
